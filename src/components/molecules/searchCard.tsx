@@ -9,21 +9,22 @@ import { DepartureDate, RoundTripDate } from "../atoms/date";
 import PassengerNumber from "../atoms/passengerNumber";
 import { Button } from "../ui/button";
 import SearchParams from "@/utils/interface/search";
+import { format } from "date-fns";
 
 const SearchCard: React.FC<{ onSearch: (searchParams: SearchParams) => void }> = ({ onSearch }) => {
   // Estado para el tipo de viaje: "departure" (solo ida) o "roundtrip" (ida y vuelta)
   const [tripType, setTripType] = useState("departure");
   
   // Estado para manejar errores en los campos del formulario, incluyendo origen, destino, pasajeros y fechas
-  const [error, setError] = useState({ origin: false, destination: false, passengers: false, dates: false });
+  const [error, setError] = useState({ originName: false, destinationName: false, passengerAmount: false, dates: false });
   
   // Estado para manejar los parámetros de búsqueda como origen, destino, fechas y número de pasajeros
   const [searchParams, setSearchParams] = useState<SearchParams>({
-    origin: "",
-    destination: "",
-    startDate: "",
-    endDate: "",
-    passengers: 0,
+    originName: "",
+    destinationName: "",
+    arrivalDate: "",
+    departureDate: "",
+    passengerAmount: 0,
     tripType: tripType,
   });
 
@@ -32,25 +33,30 @@ const SearchCard: React.FC<{ onSearch: (searchParams: SearchParams) => void }> =
     e.preventDefault();
 
     // Validar si el origen, destino, pasajeros, y fechas han sido seleccionados correctamente
-    const originIsEmpty = searchParams.origin === "";
-    const destinationIsEmpty = searchParams.destination === "";
-    const passengersIsEmpty = searchParams.passengers === 0;
-    const startDateIsEmpty = searchParams.startDate === ""; // Verifica si falta la fecha de salida
-    const endDateIsEmpty = tripType === "roundtrip" && searchParams.endDate === ""; // Verifica si falta la fecha de regreso en caso de viaje de ida y vuelta
+    const originNameIsEmpty = searchParams.originName === "";
+    const destinationNameIsEmpty = searchParams.destinationName === "";
+    const passengerAmountIsEmpty = searchParams.passengerAmount === 0;
+    const arrivalDateIsEmpty = searchParams.arrivalDate === ""; // Verifica si falta la fecha de salida
+    const departureDateIsEmpty = tripType === "roundtrip" && searchParams.departureDate === ""; // Verifica si falta la fecha de regreso en caso de viaje de ida y vuelta
 
     // Si algún campo está vacío, marca como error y no permite la búsqueda
-    if (originIsEmpty || destinationIsEmpty || passengersIsEmpty || startDateIsEmpty || (tripType === "roundtrip" && endDateIsEmpty)) {
+    if (originNameIsEmpty || destinationNameIsEmpty || passengerAmountIsEmpty || arrivalDateIsEmpty || (tripType === "roundtrip" && departureDateIsEmpty)) {
       setError({
-        origin: originIsEmpty,
-        destination: destinationIsEmpty,
-        passengers: passengersIsEmpty,
-        dates: startDateIsEmpty || (tripType === "roundtrip" && endDateIsEmpty), // Error si falta alguna fecha
+        originName: originNameIsEmpty,
+        destinationName: destinationNameIsEmpty,
+        passengerAmount: passengerAmountIsEmpty,
+        dates: arrivalDateIsEmpty || (tripType === "roundtrip" && departureDateIsEmpty), // Error si falta alguna fecha
       });
       return; // Impedir la búsqueda si hay campos vacíos
     }
 
     // Si todo está completo, ejecuta la búsqueda con los parámetros ingresados
-    onSearch({ ...searchParams, tripType });
+    onSearch({ 
+      ...searchParams, 
+      tripType,
+      arrivalDate: searchParams.arrivalDate ? format(searchParams.arrivalDate, "yyyy-MM-dd") : "", 
+      departureDate: searchParams.departureDate ? format(searchParams.departureDate, "yyyy-MM-dd") : "",
+    });
   };
 
   return (
@@ -65,42 +71,42 @@ const SearchCard: React.FC<{ onSearch: (searchParams: SearchParams) => void }> =
         <form className="mt-6 sm:mt-8" onSubmit={handleSearch} autoComplete="off">
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="origin" className="text-sm font-semibold leading-6">
-                Origin {/* Etiqueta para seleccionar el origen */}
+              <Label htmlFor="originName" className="text-sm font-semibold leading-6">
+                OriginName {/* Etiqueta para seleccionar el origen */}
               </Label>
               <div className="relative py-2">
                 <City
                   cities={citiesList} // Lista de ciudades para seleccionar
                   onSelectCity={(value) => {
-                    setSearchParams({ ...searchParams, origin: value });
-                    setError({ ...error, origin: false }); // Limpiar error al seleccionar una ciudad
+                    setSearchParams({ ...searchParams, originName: value });
+                    setError({ ...error, originName: false }); // Limpiar error al seleccionar una ciudad
                   }}
                 />
                 <span className="absolute inset-y-0 right-2 flex items-center pr-1.5">
                   <Icon icon="bx:map" className="text-primary h-5 w-5" /> {/* Icono de mapa */}
                 </span>
               </div>
-              {error.origin && <p className="text-red-600 text-sm">Origin is required.</p>} {/* Mostrar error si no se selecciona origen */}
+              {error.originName && <p className="text-red-600 text-sm">OriginName is required.</p>} {/* Mostrar error si no se selecciona origen */}
             </div>
 
             <div>
-              <Label htmlFor="destination" className="text-sm font-semibold leading-6">
-                Destination {/* Etiqueta para seleccionar el destino */}
+              <Label htmlFor="destinationName" className="text-sm font-semibold leading-6">
+                DestinationName {/* Etiqueta para seleccionar el destino */}
               </Label>
               <div className="relative py-2">
                 <City
                   cities={citiesList} // Lista de ciudades para seleccionar
                   onSelectCity={(value) => {
-                    setSearchParams({ ...searchParams, destination: value });
-                    setError({ ...error, destination: false }); // Limpiar error al seleccionar una ciudad
+                    setSearchParams({ ...searchParams, destinationName: value });
+                    setError({ ...error, destinationName: false }); // Limpiar error al seleccionar una ciudad
                   }}
                 />
                 <span className="absolute inset-y-0 right-2 flex items-center pr-1.5">
                   <Icon icon="bx:map" className="text-primary h-5 w-5" /> {/* Icono de mapa */}
                 </span>
               </div>
-              {error.destination && (
-                <p className="text-red-600 text-sm">Destination is required.</p> /* Mostrar error si no se selecciona destino */
+              {error.destinationName && (
+                <p className="text-red-600 text-sm">DestinationName is required.</p> /* Mostrar error si no se selecciona destino */
               )}
             </div>
           </div>
@@ -121,23 +127,23 @@ const SearchCard: React.FC<{ onSearch: (searchParams: SearchParams) => void }> =
 
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="origin" className="text-sm font-semibold leading-6">
+              <Label htmlFor="originName" className="text-sm font-semibold leading-6">
                 Date {/* Etiqueta para seleccionar la fecha */}
               </Label>
               <div className="relative py-2">
                 {tripType === "departure" ? (
                   <DepartureDate
                     onDateSelect={(date) =>
-                      setSearchParams({ ...searchParams, startDate: date?.toISOString() || "" }) // Seleccionar la fecha de salida
+                      setSearchParams({ ...searchParams, arrivalDate: date?.toISOString() || "" }) // Seleccionar la fecha de salida
                     }
                   />
                 ) : (
                   <RoundTripDate
                     onDepartureSelect={(date) =>
-                      setSearchParams({ ...searchParams, startDate: date?.toISOString() || "" }) // Seleccionar la fecha de salida
+                      setSearchParams({ ...searchParams, arrivalDate: date?.toISOString() || "" }) // Seleccionar la fecha de salida
                     }
                     onReturnSelect={(date) =>
-                      setSearchParams({ ...searchParams, endDate: date?.toISOString() || "" }) // Seleccionar la fecha de regreso
+                      setSearchParams({ ...searchParams, departureDate: date?.toISOString() || "" }) // Seleccionar la fecha de regreso
                     }
                   />
                 )}
@@ -153,17 +159,17 @@ const SearchCard: React.FC<{ onSearch: (searchParams: SearchParams) => void }> =
 
             {/* Selección de número de pasajeros */}
             <div>
-              <Label htmlFor="destination" className="text-sm font-semibold leading-6">
-                Number of passengers
+              <Label htmlFor="destinationName" className="text-sm font-semibold leading-6">
+                Number of passenger
               </Label>
               <div className="relative py-2">
                 <PassengerNumber
                   onSelectPassengers={(num) =>
-                    setSearchParams({ ...searchParams, passengers: num }) // Actualizar el número de pasajeros seleccionado
+                    setSearchParams({ ...searchParams, passengerAmount: num }) // Actualizar el número de pasajeros seleccionado
                   }
                 />
               </div>
-              {error.passengers && (
+              {error.passengerAmount && (
                 <p className="text-red-600 text-sm">Please select at least one passenger.</p> /* Mostrar error si no se seleccionan pasajeros */
               )}
             </div>

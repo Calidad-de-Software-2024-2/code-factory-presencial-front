@@ -1,18 +1,17 @@
 import * as React from "react";
-import { Check } from "lucide-react"; // Importa el ícono de "Check" para indicar la selección
-import { cn } from "@/lib/utils"; // Utilidad para gestionar clases condicionales
-import { Button } from "@/components/ui/button"; // Componente de botón reutilizable
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
-  Command, // Componente contenedor principal del buscador
-  CommandEmpty, // Componente para mostrar cuando no se encuentran resultados
-  CommandGroup, // Agrupa los ítems de búsqueda
-  CommandInput, // Input para buscar entre las ciudades
-  CommandItem, // Cada opción de ciudad
-  CommandList, // Lista donde se renderizan las ciudades
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // Popover para mostrar la lista desplegable
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-// Componente City que permite seleccionar una ciudad de una lista de opciones
 const City = ({
   cities, // Propiedad que recibe la lista de ciudades, cada una con un valor y una etiqueta
   onSelectCity, // Callback para manejar la ciudad seleccionada
@@ -85,7 +84,7 @@ const City = ({
   );
 };
 
-export default City; // Exporta el componente para su uso en otros módulos
+export default City;
 
 /**
  * City Component

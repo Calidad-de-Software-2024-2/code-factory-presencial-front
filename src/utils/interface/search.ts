@@ -1,9 +1,9 @@
 interface SearchParams {
-  origin: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  passengers: number;
+  originName: string;
+  destinationName: string;
+  arrivalDate: string;
+  departureDate: string;
+  passengerAmount: number;
   tripType: string;
 }
 

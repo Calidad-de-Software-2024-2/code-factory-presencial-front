@@ -2,7 +2,7 @@ const FlightsAvailable = [
   {
     origin: "New York",
     destination: "Los Angeles",
-    date: "2024-10-15",
+    date: "2024-11-15",
     time: "08:00 AM",
     scales: 0,
     prices: {

@@ -1,9 +1,8 @@
 import React from "react";
-import { useRouter } from "next/router"; // Importa useRouter para redireccionar a otra página con los parámetros de búsqueda
-import SearchCard from "../molecules/searchCard"; // Importa el componente SearchCard para el formulario de búsqueda
-import SearchParams from "@/utils/interface/search"; // Importa la interfaz SearchParams para definir los parámetros de búsqueda
+import { useRouter } from "next/router";
+import SearchCard from "../molecules/searchCard";
+import SearchParams from "@/utils/interface/search";
 
-// Componente Search: envuelve la lógica para manejar la búsqueda de vuelos
 const Search: React.FC = () => {
   const router = useRouter(); // Inicializa el hook de enrutamiento para navegar entre páginas
 
@@ -20,4 +19,4 @@ const Search: React.FC = () => {
   // Renderiza el componente SearchCard pasándole la función handleSearch como prop para manejar la búsqueda
 };
 
-export default Search; // Exporta el componente Search para ser utilizado en otras partes de la aplicación
+export default Search;

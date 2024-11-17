@@ -1,18 +1,17 @@
-import { useState } from "react"; // Importa el hook useState para manejar el estado local
-import { Button } from "@/components/ui/button"; // Importa el componente Button reutilizable
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
-  Card, // Contenedor principal que muestra la información de cada categoría
-  CardContent, // Cuerpo del Card donde se coloca la información principal
-  CardDescription, // Descripción de la categoría
-  CardFooter, // Pie del Card donde se coloca la acción (botón)
-  CardHeader, // Encabezado del Card donde se muestran el título y la descripción
-  CardTitle, // Título de la categoría
-} from "@/components/ui/card"; // Componentes de UI para estructurar las tarjetas (cards)
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Componentes para las pestañas (tabs)
-import CategoryProps from "@/utils/interface/category"; // Interfaz que define la estructura de las categorías
-import { DialogClose } from "../ui/dialog"; // Componente que cierra el diálogo cuando se selecciona una categoría
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CategoryProps from "@/utils/interface/category";
+import { DialogClose } from "../ui/dialog";
 
-// Componente Category que muestra una lista de categorías con sus precios y beneficios
 const Category = ({ categories, setSelectedCategory, prices }: CategoryProps) => {
   // Estado local para almacenar la pestaña seleccionada, inicializado con la primera categoría
   const [selectedTab, setSelectedTab] = useState(categories[0].value);
@@ -80,7 +79,7 @@ const Category = ({ categories, setSelectedCategory, prices }: CategoryProps) =>
   );
 };
 
-export default Category; // Exporta el componente para que pueda ser usado en otros archivos
+export default Category;
 
 
 /**
@@ -119,8 +118,4 @@ export default Category; // Exporta el componente para que pueda ser usado en ot
  * - Card: Un contenedor que agrupa los detalles de cada categoría.
  * - Tabs: Componente que organiza las categorías en pestañas.
  * - DialogClose: Un botón que cierra el diálogo al seleccionar una categoría.
- * 
- * Uso:
- * Este componente es ideal para casos en los que se necesita mostrar varias opciones
- * (como categorías de productos o planes) con sus detalles correspondientes.
  */

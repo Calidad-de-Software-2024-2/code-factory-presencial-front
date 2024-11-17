@@ -1,6 +1,7 @@
 const citiesList = [
   { value: "atlanta", label: "Atlanta" },
   { value: "boston", label: "Boston" },
+  { value: "Cali", label: "Cali" },
   { value: "chicago", label: "Chicago" },
   { value: "cleveland", label: "Cleveland" },
   { value: "dallas", label: "Dallas" },
@@ -9,6 +10,7 @@ const citiesList = [
   { value: "houston", label: "Houston" },
   { value: "las vegas", label: "Las Vegas" },
   { value: "los angeles", label: "Los Angeles" },
+  { value: "Medellín", label: "Medellín" },
   { value: "miami", label: "Miami" },
   { value: "nashville", label: "Nashville" },
   { value: "new orleans", label: "New Orleans" },

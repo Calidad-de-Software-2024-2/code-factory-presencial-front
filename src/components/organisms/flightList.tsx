@@ -1,98 +1,99 @@
-import { useState } from "react"; // Importa el hook useState para manejar el estado local
-import { useRouter } from "next/router"; // Importa useRouter para acceder a los parámetros de la URL
-import FlightCard from "../molecules/flightCard"; // Importa el componente FlightCard para mostrar información de cada vuelo
-import FilterCard from "../molecules/filterCard"; // Importa el componente FilterCard para filtrar por número de escalas
-import FlightsAvailable from "@/utils/const/flightList"; // Importa la lista de vuelos disponibles desde un archivo de constantes
+import { useState } from "react";
+import { useRouter } from "next/router";
+import FlightCard from "../molecules/flightCard";
+import FilterCard from "../molecules/filterCard";
+import Flight from "@/utils/interface/flight";
+import { useQuery } from "@apollo/client";
+import { SEARCH_FLIGHTS, SEARCH_ROUND_TRIP } from "@/utils/gql/queries/flights";
 
-// Componente FlightList: muestra una lista de vuelos filtrados según los parámetros de búsqueda
 const FlightList = () => {
   const router = useRouter();
-  // Extrae los parámetros de búsqueda de la URL: origen, destino, fechas y tipo de viaje
-  const { origin, destination, startDate, endDate, tripType } = router.query;
+  const { originName, destinationName, arrivalDate, departureDate, passengerAmount, tripType } =
+    router.query;
 
   const [selectedScales, setSelectedScales] = useState<number | null>(null);
-  // Estado 'selectedScales' para manejar el filtro de número de escalas
 
-  // Función para normalizar cadenas de texto y evitar problemas con mayúsculas/minúsculas o arrays
-  const normalizeString = (str: string | string[] | undefined) => {
-    return Array.isArray(str) ? str[0].toLowerCase() : (str || "").toLowerCase();
+  const queryVariables = {
+    originName: originName as string,
+    destinationName: destinationName as string,
+    arrivalDate: arrivalDate as string,
+    departureDate: departureDate ? (departureDate as string) : "",
+    passengerAmount: Number(passengerAmount),
   };
 
-  // Normaliza las cadenas de origen, destino, fechas y tipo de viaje
-  const originString = normalizeString(origin);
-  const destinationString = normalizeString(destination);
-  const startDateString = Array.isArray(startDate) ? startDate[0] : startDate || "";
-  const endDateString = Array.isArray(endDate) ? endDate[0] : endDate || "";
-  const tripTypeString = Array.isArray(tripType) ? tripType[0] : tripType || "departure";
+  const queryToUse = tripType === "departure" ? SEARCH_FLIGHTS : SEARCH_ROUND_TRIP;
 
-  // Filtra los vuelos disponibles según los criterios de búsqueda
-  const filteredFlights = FlightsAvailable.filter((flight) => {
-    // Verifica si el origen coincide con el valor seleccionado
-    const matchesOrigin = originString ? flight.origin.toLowerCase() === originString : true;
-    // Verifica si el destino coincide con el valor seleccionado
-    const matchesDestination = destinationString
-      ? flight.destination.toLowerCase() === destinationString
-      : true;
-    // Verifica si la fecha de inicio coincide con el valor seleccionado
-    const matchesStartDate = startDateString ? flight.date === startDateString.split("T")[0] : true;
-    // Verifica si la fecha de regreso coincide (para vuelos de ida y vuelta)
-    const matchesEndDate = endDateString ? flight.date === endDateString.split("T")[0] : true;
-    // Verifica si el número de escalas coincide con el filtro seleccionado
-    const matchesScales = selectedScales !== null ? flight.scales === selectedScales : true;
-
-    // Filtrado para viajes de solo ida
-    if (tripTypeString === "departure") {
-      return matchesOrigin && matchesDestination && matchesStartDate && matchesScales;
-    }
-
-    // Filtrado para viajes de ida y vuelta
-    if (tripTypeString === "roundtrip") {
-      // Verifica si la información del vuelo corresponde al vuelo de regreso
-      const matchesReturn =
-        flight.origin.toLowerCase() === destinationString &&
-        flight.destination.toLowerCase() === originString;
-
-      return (
-        (matchesOrigin && matchesDestination && matchesStartDate) || 
-        (matchesReturn && matchesEndDate && matchesScales)
-      );
-    }
-
-    return false;
+  const { data, loading, error } = useQuery(queryToUse, {
+    variables: queryVariables,
+    skip: !originName || !destinationName || !arrivalDate || !passengerAmount,
   });
 
-  
+  let filteredFlights: Flight[] = [];
+
+  if (tripType !== "departure" && data?.searchFlights) {
+    const returnFlights = data.searchFlights.map((flight: Flight) => ({
+      ...flight,
+      flightId: `${flight.flightId}-return`,
+      origin: flight.destination,
+      destination: flight.origin,
+      departureDate: flight.arrivalDate,
+      price: flight.price * 1.2,
+    }));
+
+    filteredFlights = data.searchFlights.filter((flight: Flight) => {
+      return selectedScales !== null ? flight.scales === selectedScales : true;
+    });
+
+    filteredFlights = [
+      ...filteredFlights,
+      ...returnFlights.filter((flight: Flight) => {
+        return selectedScales !== null ? flight.scales === selectedScales : true;
+      }),
+    ];
+  } else if (tripType === "departure" && data?.searchFlights) {
+    filteredFlights =
+      data?.searchFlights.filter((flight: Flight) => {
+        return selectedScales !== null ? flight.scales === selectedScales : true;
+      }) || [];
+  }
+
   return (
     <div className="flex flex-col justify-center bg-accent h-screen">
-      {/* Contenedor principal que centra el contenido verticalmente con un fondo de color */}
       <div className="flex flex-col">
         <div className="mb-2">
           <FilterCard onScalesChange={setSelectedScales} />
-          {/* Componente FilterCard para seleccionar el número de escalas */}
         </div>
         <div className="grid grid-cols-1 gap-6 overflow-y-auto max-h-[90vh] pb-2 mb-2">
-          {/* Contenedor para los vuelos filtrados, permite desplazamiento vertical */}
-          {filteredFlights.length > 0 ? (
-            // Si hay vuelos filtrados, los renderiza utilizando el componente FlightCard
-            filteredFlights.map((flight, index) => (
+          {loading ? (
+            <p>Loading flights...</p>
+          ) : error ? (
+            <p>Error loading flights: {error.message}</p>
+          ) : filteredFlights.length > 0 ? (
+            filteredFlights.map((flight: Flight) => (
               <FlightCard
-                key={index}
+                key={flight.flightId}
                 flight={{
+                  flightId: flight.flightId,
+                  flightNumber: flight.flightNumber,
+                  departureDate: flight.departureDate,
                   origin: flight.origin,
                   destination: flight.destination,
-                  date: flight.date,
-                  time: flight.time,
+                  arrivalDate: flight.arrivalDate,
                   scales: flight.scales,
-                  prices: flight.prices,
+                  price: flight.price,
+                  taxPercentage: flight.taxPercentage,
+                  surchargePercentage: flight.surchargePercentage,
+                  isCanceled: flight.isCanceled,
+                  sellSeats: flight.sellSeats,
+                  plane: flight.plane,
                 }}
               />
             ))
           ) : (
-            // Si no se encuentran vuelos, muestra un mensaje y una alerta
-              <>
-              {alert('No flights found for the given criteria.')} {/* Alerta que se muestra cuando no hay vuelos */}
+            <>
+              {alert("No flights found for the given criteria.")}
               <p className="w-3/4 mx-auto">No flights found for the given criteria.</p>
-              </>
+            </>
           )}
         </div>
       </div>
@@ -100,4 +101,4 @@ const FlightList = () => {
   );
 };
 
-export default FlightList; // Exporta el componente FlightList para ser usado en otras partes de la aplicación
+export default FlightList;
