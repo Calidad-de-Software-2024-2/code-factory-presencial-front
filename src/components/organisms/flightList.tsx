@@ -91,7 +91,6 @@ const FlightList = () => {
             ))
           ) : (
             <>
-              {alert("No flights found for the given criteria.")}
               <p className="w-3/4 mx-auto">No flights found for the given criteria.</p>
             </>
           )}
