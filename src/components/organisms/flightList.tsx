@@ -17,6 +17,10 @@ const FlightList = () => {
     null
   );
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
+  const [selectedScheduleRange, setSelectedScheduleRange] = useState<{
+    start: string;
+    end: string;
+  } | null>(null);
 
   const queryVariables = {
     originName: originName as string,
@@ -35,69 +39,28 @@ const FlightList = () => {
 
   let filteredFlights: Flight[] = [];
 
-  if (tripType !== "departure" && data?.searchFlights) {
-    const returnFlights = data.searchFlights.map((flight: Flight) => ({
-      ...flight,
-      flightId: `${flight.flightId}-return`,
-      origin: flight.destination,
-      destination: flight.origin,
-      departureDate: flight.arrivalDate,
-      price: flight.price * 1.2,
-    }));
-
-    filteredFlights = data?.searchFlights.filter((flight: Flight) => {
+  filteredFlights =
+    data?.searchFlights.filter((flight: Flight) => {
       const matchesScales = selectedScales !== null ? flight.scaleAmount === selectedScales : true;
+
       const matchesPrice =
         selectedPriceRange !== null
           ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
           : true;
-      const matchesDate =
-        selectedDateRange && selectedDateRange.from
-          ? new Date(flight.departureDate) >= selectedDateRange.from &&
-            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
+
+      const matchesDate = selectedDateRange?.from
+        ? new Date(flight.departureDate) >= selectedDateRange.from &&
+          new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
+        : true;
+
+      const matchesSchedule =
+        selectedScheduleRange !== null
+          ? new Date(flight.departureDate).getHours() >= parseInt(selectedScheduleRange.start) &&
+            new Date(flight.departureDate).getHours() < parseInt(selectedScheduleRange.end)
           : true;
 
-      return matchesScales && matchesPrice && matchesDate;
-    });
-
-    filteredFlights = [
-      ...filteredFlights,
-      ...returnFlights.filter((flight: Flight) => {
-        const matchesScales =
-          selectedScales !== null ? flight.scaleAmount === selectedScales : true;
-
-        const matchesPrice =
-          selectedPriceRange !== null
-            ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
-            : true;
-
-        const matchesDate = selectedDateRange?.from
-          ? new Date(flight.departureDate) >= selectedDateRange.from &&
-            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
-          : true;
-
-        return matchesScales && matchesPrice && matchesDate;
-      }),
-    ];
-  } else if (tripType === "departure" && data?.searchFlights) {
-    filteredFlights =
-      data?.searchFlights.filter((flight: Flight) => {
-        const matchesScales =
-          selectedScales !== null ? flight.scaleAmount === selectedScales : true;
-
-        const matchesPrice =
-          selectedPriceRange !== null
-            ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
-            : true;
-
-        const matchesDate = selectedDateRange?.from
-          ? new Date(flight.departureDate) >= selectedDateRange.from &&
-            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
-          : true;
-
-        return matchesScales && matchesPrice && matchesDate;
-      }) || [];
-  }
+      return matchesScales && matchesPrice && matchesDate && matchesSchedule;
+    }) || [];
 
   return (
     <div className="flex flex-col justify-center bg-accent h-screen">
@@ -107,6 +70,7 @@ const FlightList = () => {
             onScalesChange={setSelectedScales}
             onPriceRangeChange={setSelectedPriceRange}
             onDateRangeChange={setSelectedDateRange}
+            onScheduleRangeChange={setSelectedScheduleRange}
           />
         </div>
         <div className="grid grid-cols-1 gap-6 overflow-y-auto max-h-[90vh] pb-2 mb-2">

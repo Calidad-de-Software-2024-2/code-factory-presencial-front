@@ -7,15 +7,18 @@ import { Text } from "../atoms/text";
 import PriceRangeFilter from "../atoms/priceRangeFilter";
 import DateRangeFilter from "../atoms/dateRangeFilter";
 import { DateRange } from "react-day-picker";
+import ScheduleRangeFilter from "../atoms/scheduleRangeFilter";
 
 const FilterCard = ({
   onScalesChange,
   onPriceRangeChange,
   onDateRangeChange,
+  onScheduleRangeChange,
 }: {
   onScalesChange: (scales: number | null) => void;
   onPriceRangeChange: (range: { min: number; max: number } | null) => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
+  onScheduleRangeChange: (range: { start: string; end: string } | null) => void;
 }) => {
   return (
     <div className="bg-accent w-3/4 mx-auto">
@@ -32,6 +35,7 @@ const FilterCard = ({
             <DateRangeFilter onChange={onDateRangeChange} />
             <PriceRangeFilter onChange={onPriceRangeChange} />
             <ScalesNumberFilter onChange={onScalesChange} />
+            <ScheduleRangeFilter onChange={onScheduleRangeChange} />
             <div className="self-end">
               <DialogClose asChild>
                 <Button variant="default">Apply</Button>

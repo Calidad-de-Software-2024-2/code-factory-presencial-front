@@ -10,9 +10,18 @@ import {
 } from "@/components/ui/select";
 import scheduleRanges from "@/utils/const/scheduleRanges";
 
-const ScheduleRangeFilter = () => {
+const ScheduleRangeFilter = ({
+  onChange,
+}: {
+  onChange: (range: { start: string; end: string } | null) => void;
+}) => {
   return (
-    <Select>
+    <Select
+      onValueChange={(value) => {
+        const range = scheduleRanges.find((range) => range.value === value);
+        onChange(range ? { start: range.start, end: range.end } : null);
+      }}
+    >
       <SelectTrigger className="w-[250px] border-primary">
         <SelectValue placeholder="Select schedule range" />
       </SelectTrigger>
