@@ -14,6 +14,7 @@ export const SEARCH_FLIGHTS = gql`
       passengerAmount: $passengerAmount
     ) {
       flightId
+      arrivalDate
       departureDate
       origin {
         nameAirport

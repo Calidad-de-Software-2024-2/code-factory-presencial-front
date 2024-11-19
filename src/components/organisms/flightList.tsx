@@ -21,6 +21,7 @@ const FlightList = () => {
     start: string;
     end: string;
   } | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
 
   const queryVariables = {
     originName: originName as string,
@@ -59,7 +60,12 @@ const FlightList = () => {
             new Date(flight.departureDate).getHours() < parseInt(selectedScheduleRange.end)
           : true;
 
-      return matchesScales && matchesPrice && matchesDate && matchesSchedule;
+      const flightDuration =
+        new Date(flight.arrivalDate).getHours() - new Date(flight.departureDate).getHours();
+
+      const matchesDuration = selectedDuration !== null ? flightDuration > selectedDuration : true;
+
+      return matchesScales && matchesPrice && matchesDate && matchesSchedule && matchesDuration;
     }) || [];
 
   return (
@@ -71,6 +77,7 @@ const FlightList = () => {
             onPriceRangeChange={setSelectedPriceRange}
             onDateRangeChange={setSelectedDateRange}
             onScheduleRangeChange={setSelectedScheduleRange}
+            onDurationChange={setSelectedDuration}
           />
         </div>
         <div className="grid grid-cols-1 gap-6 overflow-y-auto max-h-[90vh] pb-2 mb-2">
@@ -80,24 +87,7 @@ const FlightList = () => {
             <p>Error loading flights: {error.message}</p>
           ) : filteredFlights.length > 0 ? (
             filteredFlights.map((flight: Flight) => (
-              <FlightCard
-                key={flight.flightId}
-                flight={{
-                  flightId: flight.flightId,
-                  flightNumber: flight.flightNumber,
-                  departureDate: flight.departureDate,
-                  origin: flight.origin,
-                  destination: flight.destination,
-                  arrivalDate: flight.arrivalDate,
-                  scaleAmount: flight.scaleAmount,
-                  price: flight.price,
-                  taxPercentage: flight.taxPercentage,
-                  surchargePercentage: flight.surchargePercentage,
-                  isCanceled: flight.isCanceled,
-                  sellSeats: flight.sellSeats,
-                  plane: flight.plane,
-                }}
-              />
+              <FlightCard key={flight.flightId} flight={flight} />
             ))
           ) : (
             <>
