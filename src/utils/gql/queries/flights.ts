@@ -28,6 +28,7 @@ export const SEARCH_FLIGHTS = gql`
         }
       }
       price
+      scaleAmount
     }
   }
 `;
@@ -63,6 +64,7 @@ export const SEARCH_ROUND_TRIP = gql`
         }
       }
       price
+      scaleAmount
     }
   }
 `;

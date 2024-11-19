@@ -5,6 +5,7 @@ import FilterCard from "../molecules/filterCard";
 import Flight from "@/utils/interface/flight";
 import { useQuery } from "@apollo/client";
 import { SEARCH_FLIGHTS, SEARCH_ROUND_TRIP } from "@/utils/gql/queries/flights";
+import { DateRange } from "react-day-picker";
 
 const FlightList = () => {
   const router = useRouter();
@@ -12,6 +13,10 @@ const FlightList = () => {
     router.query;
 
   const [selectedScales, setSelectedScales] = useState<number | null>(null);
+  const [selectedPriceRange, setSelectedPriceRange] = useState<{ min: number; max: number } | null>(
+    null
+  );
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
 
   const queryVariables = {
     originName: originName as string,
@@ -40,20 +45,57 @@ const FlightList = () => {
       price: flight.price * 1.2,
     }));
 
-    filteredFlights = data.searchFlights.filter((flight: Flight) => {
-      return selectedScales !== null ? flight.scales === selectedScales : true;
+    filteredFlights = data?.searchFlights.filter((flight: Flight) => {
+      const matchesScales = selectedScales !== null ? flight.scaleAmount === selectedScales : true;
+      const matchesPrice =
+        selectedPriceRange !== null
+          ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
+          : true;
+      const matchesDate =
+        selectedDateRange && selectedDateRange.from
+          ? new Date(flight.departureDate) >= selectedDateRange.from &&
+            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
+          : true;
+
+      return matchesScales && matchesPrice && matchesDate;
     });
 
     filteredFlights = [
       ...filteredFlights,
       ...returnFlights.filter((flight: Flight) => {
-        return selectedScales !== null ? flight.scales === selectedScales : true;
+        const matchesScales =
+          selectedScales !== null ? flight.scaleAmount === selectedScales : true;
+
+        const matchesPrice =
+          selectedPriceRange !== null
+            ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
+            : true;
+
+        const matchesDate = selectedDateRange?.from
+          ? new Date(flight.departureDate) >= selectedDateRange.from &&
+            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
+          : true;
+
+        return matchesScales && matchesPrice && matchesDate;
       }),
     ];
   } else if (tripType === "departure" && data?.searchFlights) {
     filteredFlights =
       data?.searchFlights.filter((flight: Flight) => {
-        return selectedScales !== null ? flight.scales === selectedScales : true;
+        const matchesScales =
+          selectedScales !== null ? flight.scaleAmount === selectedScales : true;
+
+        const matchesPrice =
+          selectedPriceRange !== null
+            ? flight.price >= selectedPriceRange.min && flight.price <= selectedPriceRange.max
+            : true;
+
+        const matchesDate = selectedDateRange?.from
+          ? new Date(flight.departureDate) >= selectedDateRange.from &&
+            new Date(flight.departureDate) <= (selectedDateRange.to || selectedDateRange.from)
+          : true;
+
+        return matchesScales && matchesPrice && matchesDate;
       }) || [];
   }
 
@@ -61,7 +103,11 @@ const FlightList = () => {
     <div className="flex flex-col justify-center bg-accent h-screen">
       <div className="flex flex-col">
         <div className="mb-2">
-          <FilterCard onScalesChange={setSelectedScales} />
+          <FilterCard
+            onScalesChange={setSelectedScales}
+            onPriceRangeChange={setSelectedPriceRange}
+            onDateRangeChange={setSelectedDateRange}
+          />
         </div>
         <div className="grid grid-cols-1 gap-6 overflow-y-auto max-h-[90vh] pb-2 mb-2">
           {loading ? (
@@ -79,7 +125,7 @@ const FlightList = () => {
                   origin: flight.origin,
                   destination: flight.destination,
                   arrivalDate: flight.arrivalDate,
-                  scales: flight.scales,
+                  scaleAmount: flight.scaleAmount,
                   price: flight.price,
                   taxPercentage: flight.taxPercentage,
                   surchargePercentage: flight.surchargePercentage,

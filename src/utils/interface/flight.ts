@@ -36,7 +36,7 @@ interface Flight {
     seatCapacity: number;
     seatDistribution: string;
   };
-  scales: number;
+  scaleAmount: number;
 }
 
 export default Flight;
