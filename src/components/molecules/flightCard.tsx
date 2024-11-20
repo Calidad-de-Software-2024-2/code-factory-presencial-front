@@ -12,7 +12,8 @@ const FlightCard: React.FC<{ flight: Flight }> = ({ flight }) => {
   const [selectedCategory, setSelectedCategory] = useState(categoriesData[0]);
 
   const priceByCategory = (basePrice: number, category: keyof typeof categoryMultipliers) => {
-    return (basePrice * categoryMultipliers[category]).toFixed(2);
+    const rawPrice = basePrice * categoryMultipliers[category];
+    return Math.round(rawPrice);
   };
 
   const prices = {

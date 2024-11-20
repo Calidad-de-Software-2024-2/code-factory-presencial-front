@@ -6,6 +6,7 @@ import Flight from "@/utils/interface/flight";
 import { useQuery } from "@apollo/client";
 import { SEARCH_FLIGHTS, SEARCH_ROUND_TRIP } from "@/utils/gql/queries/flights";
 import { DateRange } from "react-day-picker";
+import { Button } from "../ui/button";
 
 const FlightList = () => {
   const router = useRouter();
@@ -72,19 +73,24 @@ const FlightList = () => {
     <div className="flex flex-col justify-center bg-accent h-screen">
       <div className="flex flex-col">
         <div className="mb-2">
-          <FilterCard
-            onScalesChange={setSelectedScales}
-            onPriceRangeChange={setSelectedPriceRange}
-            onDateRangeChange={setSelectedDateRange}
-            onScheduleRangeChange={setSelectedScheduleRange}
-            onDurationChange={setSelectedDuration}
-          />
+          <div className="flex justify-between w-3/4 mx-auto">
+            <FilterCard
+              onScalesChange={setSelectedScales}
+              onPriceRangeChange={setSelectedPriceRange}
+              onDateRangeChange={setSelectedDateRange}
+              onScheduleRangeChange={setSelectedScheduleRange}
+              onDurationChange={setSelectedDuration}
+            />
+            <Button variant="default" onClick={() => router.push("/")}>
+              Back to Search
+            </Button>
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-6 overflow-y-auto max-h-[90vh] pb-2 mb-2">
           {loading ? (
-            <p>Loading flights...</p>
+            <p className="w-3/4 mx-auto">Loading flights...</p>
           ) : error ? (
-            <p>Error loading flights: {error.message}</p>
+            <p className="w-3/4 mx-auto">No flights found for the given criteria.</p>
           ) : filteredFlights.length > 0 ? (
             filteredFlights.map((flight: Flight) => (
               <FlightCard key={flight.flightId} flight={flight} />

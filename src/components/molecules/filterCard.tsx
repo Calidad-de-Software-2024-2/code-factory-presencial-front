@@ -40,7 +40,7 @@ const FilterCard = ({
   };
 
   return (
-    <div className="bg-accent w-3/4 mx-auto">
+    <div className="bg-accent">
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="ghost">
